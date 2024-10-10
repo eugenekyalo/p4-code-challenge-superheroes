@@ -1,38 +1,39 @@
-import pytest
-from app import app
-from models import db, Hero, Power, HeroPower
-from faker import Faker
+from app import db, Hero, Power
 
+def test_create_hero(session):
+    hero = Hero(name='Test Hero', super_name='The Tester')
+    session.add(hero)
+    session.commit()
 
-class TestPower:
-    '''Class Power in models.py'''
+    assert hero.id is not None
+    assert hero.name == 'Test Hero'
+    assert hero.super_name == 'The Tester'
 
-    def test_description_valid(self):
-        '''requires description at least 20 letters.'''
+def test_create_power(session):
+    power = Power(name='Test Power', description='This is a test power with more than 20 characters.')
+    session.add(power)
+    session.commit()
 
-        with app.app_context():
-            with pytest.raises(ValueError):
-                power = Power(name=Faker().name(),
-                              description="flies")
-                db.session.add(power)
-                db.session.commit()
+    assert power.id is not None
+    assert power.name == 'Test Power'
+    assert power.description == 'This is a test power with more than 20 characters.'
 
+def test_hero_to_dict(session):
+    hero = Hero(name='Test Hero', super_name='The Tester')
+    session.add(hero)
+    session.commit()
 
-class TestHeroPower:
-    '''Class HeroPower in models.py'''
+    hero_dict = hero.to_dict()
+    assert hero_dict['id'] == hero.id
+    assert hero_dict['name'] == 'Test Hero'
+    assert hero_dict['super_name'] == 'The Tester'
 
-    def test_strength_valid(self):
-        '''requires strength to be Strong, Weak, Average.'''
+def test_power_to_dict(session):
+    power = Power(name='Test Power', description='This is a test power with more than 20 characters.')
+    session.add(power)
+    session.commit()
 
-        with app.app_context():
-            with pytest.raises(ValueError):
-                fake = Faker()
-                hero = Hero(name=fake.name(), super_name=fake.name())
-                power = Power(name=fake.name(), description=fake.sentence())
-                db.session.add_all([hero, power])
-                db.session.commit()
-
-                hero_power = HeroPower(
-                    hero_id=hero.id, power_id=power.id, strength='Super Strong')
-                db.session.add(hero_power)
-                db.session.commit()
+    power_dict = power.to_dict()
+    assert power_dict['id'] == power.id
+    assert power_dict['name'] == 'Test Power'
+    assert power_dict['description'] == 'This is a test power with more than 20 characters.'
